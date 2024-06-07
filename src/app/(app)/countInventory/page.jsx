@@ -6,7 +6,7 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import { CountInventoryTable} from "./components";
 
-export const page = () => {
+export const countInventoryPage = () => {
   const [data, setData] = useState([]);
   const [refetch, setRefetch] = useState(false);
 
@@ -34,4 +34,4 @@ export const page = () => {
   );
 };
 
-export default page;
+export default countInventoryPage;
