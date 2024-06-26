@@ -4,19 +4,17 @@ import React, { useEffect, useState } from "react";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-import { RoleTable } from "./components";
+import { UserTable } from "./components";
 
-export const rolesPage = () => {
+export const page = () => {
   const [data, setData] = useState([]);
   const [refetch, setRefetch] = useState(false);
 
-  
-  const getRol = async () => {
+  const getUser = async () => {
     await apiSystem
-      .get(`/role`)
+      .get(`/user`)
       .then((response) => {
-        setData(response?.data?.roles);
-        console.log(response);
+        setData(response?.data?.users);
       })
       .catch((error) => {
         console.log(error);
@@ -24,14 +22,14 @@ export const rolesPage = () => {
   };
 
   useEffect(() => {
-    getRol();
+    getUser();
   }, [refetch]);
 
   return (
     <div className="w-full">
-      <RoleTable roles={data} onRefetch={setRefetch}></RoleTable>
+      <UserTable users={data} onRefetch={setRefetch}></UserTable>
     </div>
   );
 };
 
-export default rolesPage;
+export default page;

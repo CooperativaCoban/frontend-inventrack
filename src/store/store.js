@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { authSlice } from "./slice/auth/authSlice";
+import { authSlice } from "@/store/slice/auth/authSlice";
 /* import { userSlice } from "./slice/user/userSlice";
 import { formTypeSlice } from "./slice/formType/formTypeSlice";
 import { checkerSlice } from "./slice/checker/checkerSlice";

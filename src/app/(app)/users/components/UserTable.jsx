@@ -1,41 +1,38 @@
 "use client";
-import 'primereact/resources/themes/saga-blue/theme.css';   // tema opcional
-import 'primereact/resources/primereact.min.css';            // estilos de componentes
-import 'primeicons/primeicons.css';                          // iconos
-import 'primeflex/primeflex.css';       
-import React from 'react';
+import React from "react";
 import { classNames } from "primereact/utils";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
-import { InputTextarea } from "primereact/inputtextarea";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { apiSystem } from "@/api";
 import { useRef, useState } from "react";
+import { InputOption } from "@/components";
 
-
-export default function RoleTable({ roles, onRefetch }) {
-  let emptyRole = {
-    pk_role: null,
-    role: "",
-    comment: "",
+export default function UserTable({ users, onRefetch }) {
+  let emptyUser = {
+    pk_user: null,
+    user: "",
+    name_user: "",
+    password: "",
+    pk_role: "",
   };
 
-  const [productDialog, setProductDialog] = useState(false);
-  const [deleteProductDialog, setDeleteProductDialog] = useState(false);
-  const [role, setRole] = useState(emptyRole);
-  const [selectedProducts, setSelectedProducts] = useState(null);
+  const [userDialog, setUserDialog] = useState(false);
+  const [deleteUserDialog, setDeleteUserDialog] = useState(false);
+  const [name_user, setName_User] = useState(emptyUser);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
   const toast = useRef(null);
   const dt = useRef(null);
 
-  const createRol = async (data) => {
+  const createUser = async (data) => {
     await apiSystem
-      .post(`/role`, data)
+      .post(`/user`, data)
       .then((response) => {
         console.log(response);
       })
@@ -44,9 +41,9 @@ export default function RoleTable({ roles, onRefetch }) {
       });
   };
 
-  const updateRol = async (id, data) => {
+  const updateUser = async (id, data) => {
     await apiSystem
-      .put(`/role/${id}`, data)
+      .put(`/user/${id}`, data)
       .then((response) => {
         console.log(response);
       })
@@ -55,9 +52,9 @@ export default function RoleTable({ roles, onRefetch }) {
       });
   };
 
-  const deteleRol = async (id) => {
+  const deleteUser = async (id) => {
     await apiSystem
-      .delete(`/role/${id}`)
+      .delete(`/user/${id}`)
       .then((response) => {
         console.log(response);
       })
@@ -67,32 +64,32 @@ export default function RoleTable({ roles, onRefetch }) {
   };
 
   const openNew = () => {
-    setRole(emptyRole);
+    setName_User(emptyUser);
     setSubmitted(false);
-    setProductDialog(true);
+    setUserDialog(true);
   };
 
   const hideDialog = () => {
     setSubmitted(false);
-    setProductDialog(false);
+    setUserDialog(false);
   };
 
-  const hideDeleteProductDialog = () => {
-    setDeleteProductDialog(false);
+  const hideDeleteUserDialog = () => {
+    setDeleteUserDialog(false);
   };
 
-  const saveProduct = async () => {
+  const saveUser = async () => {
     setSubmitted(true);
 
-    if (role.role.trim()) {
-      console.log("que paso", role);
-      if (role.pk_role) {
+    if (name_user.name_user.trim()) {
+      console.log("que paso", name_user);
+      if (name_user.pk_user) {
         try {
-          await updateRol(role.pk_role, role);
+          await updateUser(name_user.pk_user, name_user);
           toast.current.show({
             severity: "success",
-            summary: "Rol actualizado",
-            detail: "El rol se actualizo correctamente",
+            summary: "Usuario actualizado",
+            detail: "El usuario se actualizo correctamente",
             life: 3000,
           });
         } catch (error) {
@@ -100,57 +97,57 @@ export default function RoleTable({ roles, onRefetch }) {
           toast.current.show({
             severity: "error",
             summary: "Error! ",
-            detail: "Hubo un error al actualizar el rol",
+            detail: "Hubo un error al actualizar el usuario",
             life: 3000,
           });
         }
       } else {
         try {
-          await createRol(role);
+          await createUser(name_user);
           toast.current.show({
             severity: "success",
             summary: "Exito!",
-            detail: "El rol se creo correctamente",
+            detail: "El usuario se creo correctamente",
             life: 3000,
           });
+          console.log("info", createUser)
         } catch (error) {
           console.log(error);
           toast.current.show({
             severity: "error",
             summary: "Error! ",
-            detail: "Hubo un error al crear el rol",
+            detail: "Hubo un error al crear el usuario",
             life: 3000,
           });
         }
       }
 
-      setProductDialog(false);
-      setRole(emptyRole);
+      setUserDialog(false);
+      setName_User(emptyUser);
     }
 
     onRefetch(true);
   };
-  
 
-  const editProduct = (role) => {
-    setRole({ ...role });
-    setProductDialog(true);
+  const editUser = (name_user) => {
+    setName_User({ ...name_user });
+    setUserDialog(true);
   };
 
-  const confirmDeleteProduct = (role) => {
-    setRole(role);
-    setDeleteProductDialog(true);
+  const confirmDeleteUser = (name_user) => {
+    setName_User(name_user);
+    setDeleteUserDialog(true);
   };
 
-  const deleteProduct = async () => {
+  const deleteUsers = async () => {
     try {
-      await deteleRol(role.pk_role);
-      setDeleteProductDialog(false);
-      setRole(emptyRole);
+      await deleteUser(name_user.pk_user);
+      setDeleteUserDialog(false);
+      setName_User(emptyUser);
       toast.current.show({
         severity: "success",
         summary: "Éxito!",
-        detail: "Rol eliminado correctamente",
+        detail: "Usuario eliminado correctamente",
         life: 3000,
       });
     } catch (error) {
@@ -158,27 +155,26 @@ export default function RoleTable({ roles, onRefetch }) {
       toast.current.show({
         severity: "error",
         summary: "Error! ",
-        detail: "Hubo un error al eliminar el rol",
+        detail: "Hubo un error al eliminar el usuario",
         life: 3000,
       });
     }
     onRefetch(true);
   };
 
-
   const onInputChange = (e, name) => {
     const val = (e.target && e.target.value) || "";
-    let _product = { ...role };
+    let _user = { ...name_user };
 
-    _product[`${name}`] = val;
+    _user[`${name}`] = val;
 
-    setRole(_product);
+    setName_User(_user);
   };
 
   const leftToolbarTemplate = () => {
     return (
       <Button
-        label="Crear Rol"
+        label="Crear Usuario"
         icon="pi pi-plus"
         severity="success"
         onClick={openNew}
@@ -194,14 +190,14 @@ export default function RoleTable({ roles, onRefetch }) {
           rounded
           outlined
           className="mr-2"
-          onClick={() => editProduct(rowData)}
+          onClick={() => editUser(rowData)}
         />
         <Button
           icon="pi pi-trash"
           rounded
           outlined
           severity="danger"
-          onClick={() => confirmDeleteProduct(rowData)}
+          onClick={() => confirmDeleteUser(rowData)}
         />
       </React.Fragment>
     );
@@ -219,25 +215,30 @@ export default function RoleTable({ roles, onRefetch }) {
       </span>
     </div>
   );
-  const productDialogFooter = (
+  const userDialogFooter = (
     <React.Fragment>
-      <Button label="Cancelar" icon="pi pi-times" outlined onClick={hideDialog} />
-      <Button label="Guardar" icon="pi pi-check" onClick={saveProduct} />
+      <Button
+        label="Cancelar"
+        icon="pi pi-times"
+        outlined
+        onClick={hideDialog}
+      />
+      <Button label="Guardar" icon="pi pi-check" onClick={saveUser} />
     </React.Fragment>
   );
-  const deleteProductDialogFooter = (
+  const deleteUserDialogFooter = (
     <React.Fragment>
       <Button
         label="No"
         icon="pi pi-times"
         outlined
-        onClick={hideDeleteProductDialog}
+        onClick={hideDeleteUserDialog}
       />
       <Button
         label="Sí"
         icon="pi pi-check"
         severity="danger"
-        onClick={deleteProduct}
+        onClick={deleteUsers}
       />
     </React.Fragment>
   );
@@ -254,25 +255,26 @@ export default function RoleTable({ roles, onRefetch }) {
 
         <DataTable
           ref={dt}
-          value={roles}
-          selection={selectedProducts}
-          onSelectionChange={(e) => setSelectedProducts(e.value)}
+          value={users}
+          selection={selectedUser}
+          onSelectionChange={(e) => setSelectedUser(e.value)}
           dataKey="id"
           paginator
-          rows={4}
+          rows={5}
           tableClassName="border"
-          rowsPerPageOptions={[4, 10, 25]}
+          rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Mostrando registros del {first} al {last}, Total {totalRecords} registros"
           globalFilter={globalFilter}
         >
           <Column
-            field="role"
-            header="Rol"
+            field="name_user"
+            header="Nombre"
             sortable
             style={{ minWidth: "16rem" }}
           ></Column>
-          <Column field="comment" header="Comentario"></Column>
+          <Column field="user" header="Usuario"></Column>
+          <Column field="pk_user" header="Rol"></Column>
           <Column
             body={actionBodyTemplate}
             exportable={false}
@@ -282,66 +284,107 @@ export default function RoleTable({ roles, onRefetch }) {
       </div>
 
       <Dialog
-        visible={productDialog}
+        visible={userDialog}
         style={{ width: "32rem" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Crear Rol"
+        header="Crear Usuario"
         modal
         className="p-fluid"
-        footer={productDialogFooter}
+        footer={userDialogFooter}
         onHide={hideDialog}
       >
-        <div className="field">
-          <label htmlFor="role" className="font-bold">
-            Rol
+        <div className="field p-2">
+          <label htmlFor="name_user" className="font-bold">
+            Nombre completo
           </label>
           <InputText
-            id="role"
-            value={role.role}
-            onChange={(e) => onInputChange(e, "role")}
+            id="name_user"
+            value={name_user.name_user}
+            onChange={(e) => onInputChange(e, "name_user")}
             required
             autoFocus
-            className={classNames({ "p-invalid": submitted && !role.role })}
+            className={classNames({
+              "p-invalid": submitted && !name_user.name_user,
+            })}
           />
-          {submitted && !role.role && (
-            <small className="p-error">El rol es requerido.</small>
+          {submitted && !name_user.name_user && (
+            <small className="p-error">El nombre es requerido.</small>
           )}
         </div>
 
-        <div className="formgrid grid">
-          <div className="field">
-            <label htmlFor="comment" className="font-bold">
-              Comentario
+        <div className="flex ">
+          <div className="field p-2">
+            <label htmlFor="user" className="font-bold">
+              Usuario
             </label>
-            <InputTextarea
-              id="comment"
-              value={role.comment}
-              onChange={(e) => onInputChange(e, "comment")}
+            <InputText
+              id="user"
+              value={name_user.user}
+              onChange={(e) => onInputChange(e, "user")}
               required
-              rows={3}
-              cols={20}
+              autoFocus
+              className={classNames({
+                "p-invalid": submitted && !name_user.user,
+              })}
             />
+            {submitted && !name_user.user && (
+              <small className="p-error">El usuario es requerido.</small>
+            )}
           </div>
+
+          <div className="field p-2">
+            <label htmlFor="password" className="font-bold">
+              Contraseña
+            </label>
+            <InputText
+              id="password"
+              value={name_user.password}
+              onChange={(e) => onInputChange(e, "password")}
+              required
+              autoFocus
+              className={classNames({
+                "p-invalid": submitted && !name_user.password,
+              })}
+            />
+            {submitted && !name_user.password && (
+              <small className="p-error">La contraseña es requerida.</small>
+            )}
+          </div>
+        </div>
+
+        <div className="field p-2 ">
+          <label htmlFor="pk_role" className="font-bold">
+            Rol
+          </label>
+          <InputOption
+            role={name_user.pk_role}
+            onSelect={(optionId) => (name_user.pk_role = optionId)}
+            required
+          />
+          {submitted && !name_user.pk_role && (
+            <small className="p-error">El rol es requerido.</small>
+          )}
         </div>
       </Dialog>
 
       <Dialog
-        visible={deleteProductDialog}
+        visible={deleteUserDialog}
         style={{ width: "32rem" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
         header="Confirm"
         modal
-        footer={deleteProductDialogFooter}
-        onHide={hideDeleteProductDialog}
+        footer={deleteUserDialogFooter}
+        onHide={hideDeleteUserDialog}
       >
         <div className="confirmation-content">
           <i
             className="pi pi-exclamation-triangle mr-3"
             style={{ fontSize: "2rem" }}
           />
-          {role && (
+          {name_user && (
             <span>
-              Esta seguro de querer eliminar el rol <b>{role.role}</b>?
+              Esta seguro de querer eliminar el usuario{" "}
+              <b>{name_user.name_user}</b>?
             </span>
           )}
         </div>
@@ -350,4 +393,4 @@ export default function RoleTable({ roles, onRefetch }) {
   );
 }
 
-export { RoleTable };
+export { UserTable };

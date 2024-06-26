@@ -9,7 +9,7 @@ import Navbar from "@/components/Navbar";
 const menuPage = () => {
     return (
         <div className="w-full h-screen flex flex-col bg-white">
-            <Navbar />
+    
             <div className="flex-grow flex items-center justify-center bg-white">
                 <div
                     className="flex items-center justify-center cursor-pointer w-20 h-20"

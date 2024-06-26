@@ -4,18 +4,18 @@ import React, { useEffect, useState } from "react";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-import { RoleTable } from "./components";
+import { ComInventoryTable} from "./components";
 
-export const rolesPage = () => {
+export const comInventoryPage = () => {
   const [data, setData] = useState([]);
   const [refetch, setRefetch] = useState(false);
 
   
-  const getRol = async () => {
+  const getProduct = async () => {
     await apiSystem
-      .get(`/role`)
+      .get(`/comInventory`)
       .then((response) => {
-        setData(response?.data?.roles);
+        setData(response?.data?.comInventorys);
         console.log(response);
       })
       .catch((error) => {
@@ -24,14 +24,14 @@ export const rolesPage = () => {
   };
 
   useEffect(() => {
-    getRol();
+    getProduct();
   }, [refetch]);
 
   return (
     <div className="w-full">
-      <RoleTable roles={data} onRefetch={setRefetch}></RoleTable>
+      <ComInventoryTable comInventorys={data} onRefetch={setRefetch}></ComInventoryTable>
     </div>
   );
 };
 
-export default rolesPage;
+export default comInventoryPage;
