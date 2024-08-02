@@ -13,11 +13,11 @@ const SideBar = (props) => {
       label: "Dashboard",
       className: "text text-white",
       icon: "pi pi-th-large",
-      url: "/",
+      url: "/menu",
     },
     {
       label: "Contabilidad",
-      className: "text text-white bg-indigo-900",
+      className: "text bg-indigo-900",
       icon: "pi pi-fw pi-file",
       items: [
         {
@@ -30,32 +30,64 @@ const SideBar = (props) => {
           label: "Reporte",
           className: "text text-white",
           icon: "pi pi-fw pi-calendar-minus",
-          url: "/appoiments",
+          url: "/countReport",
         },
       ],
     },
     {
       label: "Informática",
-      className: "text text-white bg-indigo-900",
-      icon: "pi pi-fw pi-user",
+      className: "text bg-indigo-900",
+      icon: "pi pi-fw pi-file",
       items: [
         {
           label: "Inventario",
           className: "text text-white",
-          icon: "pi pi-fw pi-user-plus",
-          url: "/comInventory",
+          icon: "pi pi-fw pi-calendar-minus",
+          url: "/comInventory"
         },
         {
-          label: "Usuarios",
+          label: "Reporte",
           className: "text text-white",
-          icon: "pi pi-fw pi-user-plus",
-          url: "/users",
+          icon: "pi pi-fw pi-calendar-minus",
+          url: "/comReport",
+        },
+      ],
+    },
+    {
+      label: "Talento Humano",
+      className: "text bg-indigo-900",
+      icon: "pi pi-fw pi-file",
+      items: [
+        {
+          label: "Inventario",
+          className: "text text-white",
+          icon: "pi pi-fw pi-calendar-minus",
+          url: "/thInventory"
         },
         {
-          label: "Pacientes",
-          className: "text text-white ",
-          icon: "pi pi-fw pi-user-plus",
-          url: "/patients",
+          label: "Reporte",
+          className: "text text-white",
+          icon: "pi pi-fw pi-calendar-minus",
+          url: "/thReport",
+        },
+      ],
+    },
+    {
+      label: "Usuarios",
+      className: "text bg-indigo-900",
+      icon: "pi pi-fw pi-file",
+      items: [
+        {
+          label: "Usuario",
+          className: "text text-white",
+          icon: "pi pi-fw pi-calendar-minus",
+          url: "/users"
+        },
+        {
+          label: "Roles",
+          className: "text text-white",
+          icon: "pi pi-fw pi-calendar-minus",
+          url: "/roles"
         },
       ],
     },

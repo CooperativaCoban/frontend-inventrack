@@ -14,8 +14,11 @@
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
     "crypto-js": "^4.2.0",
+    "file-saver": "^2.0.5",
     "js-cookie": "^3.0.5",
     "js-cookies": "^1.0.4",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
     "next": "14.2.3",
     "next-redux-wrapper": "^8.1.0",
     "primeflex": "^3.3.1",
@@ -28,7 +31,8 @@
     "react-router-dom": "^6.23.1",
     "react-transition-group": "^4.4.5",
     "redux": "^5.0.1",
-    "sweetalert2": "^11.11.1"
+    "sweetalert2": "^11.11.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "daisyui": "^4.12.2",

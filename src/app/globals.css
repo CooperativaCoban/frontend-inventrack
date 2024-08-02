@@ -180,3 +180,33 @@ body {
   margin-top: 5px;
   color: #6c757d;
 }
+
+
+
+
+.password-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-container .p-password {
+  width: 100%;
+}
+
+.password-container .p-password input {
+  width: calc(100% - 30px); /* Ajusta el ancho del input */
+  padding-right: 30px; /* Espacio para el icono */
+}
+
+.password-container .p-password .p-password-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.two-column-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}

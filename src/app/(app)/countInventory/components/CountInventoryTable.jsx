@@ -10,6 +10,8 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { apiSystem } from "@/api";
 import { useRef, useState } from "react";
+import { InputDate } from '@/components';
+
 
 export default function CountInventoryTable({ countInventorys, onRefetch }) {
   let emptyCountInventory = {
@@ -18,11 +20,11 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
     category: "",
     supplier: "",
     d_date: "",
-    amount:"",
-    unitprice:"",
-    totalprice:""
-
+    amount: "",
+    unitprice: "",
+    totalprice: ""
   };
+
 
   const [countDialog, setCountDialog] = useState(false);
   const [deleteCountDialog, setDeleteCountDialog] = useState(false);
@@ -32,6 +34,7 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
   const [globalFilter, setGlobalFilter] = useState(null);
   const toast = useRef(null);
   const dt = useRef(null);
+
 
   const createCountInventory = async (data) => {
     await apiSystem
@@ -72,19 +75,21 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
     setCountDialog(true);
   };
 
+
   const hideDialog = () => {
     setSubmitted(false);
     setCountDialog(false);
   };
 
+
+
   const hideDeleteCountDialog = () => {
     setDeleteCountDialog(false);
   };
 
-
   const saveCount = async () => {
     setSubmitted(true);
-
+  
     if (product.product.trim()) {
       console.log("que paso", product);
       if (product.pk_countinventory) {
@@ -92,8 +97,8 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
           await updateCount(product.pk_countinventory, product);
           toast.current.show({
             severity: "success",
-            summary: "Rol actualizado",
-            detail: "El paciente se actualizo correctamente",
+            summary: "Producto actualizado",
+            detail: "El producto se actualizo correctamente",
             life: 3000,
           });
         } catch (error) {
@@ -101,7 +106,7 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
           toast.current.show({
             severity: "error",
             summary: "Error! ",
-            detail: "Hubo un error al actualizar al paciente",
+            detail: "Hubo un error al actualizar el producto",
             life: 3000,
           });
         }
@@ -111,7 +116,7 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
           toast.current.show({
             severity: "success",
             summary: "Exito!",
-            detail: "El paciente se creo correctamente",
+            detail: "El producto se creo correctamente",
             life: 3000,
           });
         } catch (error) {
@@ -119,19 +124,21 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
           toast.current.show({
             severity: "error",
             summary: "Error! ",
-            detail: "Hubo un error al crear al paciente",
+            detail: "Hubo un error al crear el producto",
             life: 3000,
           });
         }
+  
+        setCountDialog(false);
+        setProduct(emptyCountInventory);
+        onRefetch();
       }
-
+  
       setCountDialog(false);
       setProduct(emptyCountInventory);
     }
     onRefetch(true);
   };
-
-
   const editCount = (product) => {
     setProduct({ ...product });
     setCountDialog(true);
@@ -158,31 +165,40 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
       toast.current.show({
         severity: "error",
         summary: "Error! ",
-        detail: "Hubo un error al eliminar al paciente",
+        detail: "Hubo un error al eliminar al producto",
         life: 3000,
       });
     }
     onRefetch(true);
   };
 
-
-  const onInputChange = (e, nombre) => {
+  const onInputChange = (e, name) => {
     const val = (e.target && e.target.value) || "";
-    let _count = { ...product };
+    let _product = { ...product };
 
-    _count[`${nombre}`] = val;
+    _product[`${name}`] = val;
 
-    setProduct(_count);
+    // Calcula el precio total si el campo modificado es 'amount' o 'unitprice'
+    if (name === 'amount' || name === 'unitprice') {
+      const amount = parseFloat(_product.amount) || 0;
+      const unitprice = parseFloat(_product.unitprice) || 0;
+      _product.totalprice = (amount * unitprice).toFixed(2);
+    }
+
+    setProduct(_product);
   };
+
 
   const leftToolbarTemplate = () => {
     return (
-      <Button
-        label="Crear Producto"
-        icon="pi pi-plus"
-        severity="success"
-        onClick={openNew}
-      />
+      <>
+        <Button
+          label="Crear Producto"
+          icon="pi pi-plus"
+          severity="success"
+          onClick={openNew}
+        />
+      </>
     );
   };
 
@@ -209,7 +225,7 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
 
   const header = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between ">
-      <span className="p-input-icon-left">
+      <span className="p-input-icon-left p-2">
         <i className="pi pi-search" />
         <InputText
           type="search"
@@ -225,6 +241,7 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
       <Button label="Guardar" icon="pi pi-check" onClick={saveCount} />
     </React.Fragment>
   );
+
   const deleteCountDialogFooter = (
     <React.Fragment>
       <Button
@@ -242,7 +259,6 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
     </React.Fragment>
   );
 
-    // countInventorys es la variable que traera los objetos de la tabla dentro de un array que se creo en los controladores del backend
   return (
     <div>
       <Toast ref={toast} />
@@ -342,10 +358,10 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
             onChange={(e) => onInputChange(e, "supplier")}
             required
             autoFocus
-            className={classNames({ "p-invalid": submitted && !product.supplier})}
+            className={classNames({ "p-invalid": submitted && !product.supplier })}
           />
           {submitted && !product.supplier && (
-            <small className="p-error">El provedor es requerido.</small>
+            <small className="p-error">El proveedor es requerido.</small>
           )}
         </div>
 
@@ -353,16 +369,16 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
           <label htmlFor="d_date" className="font-bold">
             Fecha de Registro
           </label>
-          <InputText
+          <InputDate
             id="d_date"
             value={product.d_date}
             onChange={(e) => onInputChange(e, "d_date")}
             required
             autoFocus
-            className={classNames({ "p-invalid": submitted && !product.d_date})}
+            className={classNames({ "p-invalid": submitted && !product.d_date })}
           />
           {submitted && !product.d_date && (
-            <small className="p-error">La fecha de Registro es requerido.</small>
+            <small className="p-error">La fecha de Registro es requerida.</small>
           )}
         </div>
 
@@ -376,7 +392,7 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
             onChange={(e) => onInputChange(e, "amount")}
             required
             autoFocus
-            className={classNames({ "p-invalid": submitted && !product.amount})}
+            className={classNames({ "p-invalid": submitted && !product.amount })}
           />
           {submitted && !product.amount && (
             <small className="p-error">El stock es requerido.</small>
@@ -393,14 +409,13 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
             onChange={(e) => onInputChange(e, "unitprice")}
             required
             autoFocus
-            className={classNames({ "p-invalid": submitted && !product.unitprice})}
+            className={classNames({ "p-invalid": submitted && !product.unitprice })}
           />
           {submitted && !product.unitprice && (
             <small className="p-error">El precio unitario es requerido.</small>
           )}
         </div>
 
-        
         <div className="field">
           <label htmlFor="totalprice" className="font-bold">
             Precio total
@@ -411,7 +426,7 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
             onChange={(e) => onInputChange(e, "totalprice")}
             required
             autoFocus
-            className={classNames({ "p-invalid": submitted && !product.totalprice})}
+            className={classNames({ "p-invalid": submitted && !product.totalprice })}
           />
           {submitted && !product.totalprice && (
             <small className="p-error">El precio total es requerido.</small>
@@ -446,4 +461,3 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
 }
 
 export { CountInventoryTable };
-
