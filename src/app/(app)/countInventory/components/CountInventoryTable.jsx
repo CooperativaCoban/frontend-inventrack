@@ -49,8 +49,11 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
 
   const updateCount = async (id, data) => {
     await apiSystem
-      .put(`/countInventory/${id}`, data)
-      .then((response) => {
+    .put(`/countInventory/${id}`, {
+      ...data,
+      totalprice: (parseFloat(data.amount) * parseFloat(data.unitprice)).toFixed(2)
+      })
+       .then((response) => {
         console.log(response);
       })
       .catch((error) => {
@@ -68,6 +71,14 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
         console.log(error);
       });
   };
+
+  
+  const rowClass = (data) => {
+    return {
+        'row-red': data.amount <= 5
+    }
+};
+
 
   const openNew = () => {
     setProduct(emptyCountInventory);
@@ -282,6 +293,7 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Mostrando registros del {first} al {last}, Total {totalRecords} registros"
           globalFilter={globalFilter}
+          rowClassName={rowClass}
         >
           <Column
             field="product"
@@ -423,9 +435,10 @@ export default function CountInventoryTable({ countInventorys, onRefetch }) {
           <InputText
             id="totalprice"
             value={product.totalprice}
-            onChange={(e) => onInputChange(e, "totalprice")}
+            /* onChange={(e) => onInputChange(e, "totalprice")}
             required
-            autoFocus
+            autoFocus */
+            readOnly
             className={classNames({ "p-invalid": submitted && !product.totalprice })}
           />
           {submitted && !product.totalprice && (

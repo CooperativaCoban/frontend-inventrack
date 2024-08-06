@@ -50,7 +50,10 @@ export default function ComInventoryTable({ comInventorys, onRefetch }) {
 
   const updateCom = async (id, data) => {
     await apiSystem
-      .put(`/comInventory/${id}`, data)
+      .put(`/comInventory/${id}`, {
+        ...data,
+        totalprice: (parseFloat(data.stock) * parseFloat(data.unitprice)).toFixed(2)
+        })
       .then((response) => {
         console.log(response);
       })
@@ -69,6 +72,12 @@ export default function ComInventoryTable({ comInventorys, onRefetch }) {
         console.log(error);
       });
   };
+
+  const rowClass = (data) => {
+    return {
+        'row-red': data.stock <= 5
+    }
+};
 
   const openNew = () => {
     setItem(emptyComInventory);
@@ -127,6 +136,11 @@ export default function ComInventoryTable({ comInventorys, onRefetch }) {
             life: 3000,
           });
         }
+
+        setComDialog(false);
+        setProduct(emptyComInventory);
+        onRefetch();
+
       }
 
       setComDialog(false);
@@ -175,6 +189,14 @@ export default function ComInventoryTable({ comInventorys, onRefetch }) {
     let _com = { ...item };
 
     _com[`${nombre}`] = val;
+
+      // Calcula el precio total si el campo modificado es 'stock' o 'unitprice'
+      if (nombre === 'stock' || nombre === 'unitprice') {
+        const stock= parseFloat(_com.stock) || 0;
+        const unitprice = parseFloat(_com.unitprice) || 0;
+        _com.totalprice = (stock * unitprice).toFixed(2);
+      }
+
 
     setItem(_com);
   };
@@ -270,6 +292,7 @@ export default function ComInventoryTable({ comInventorys, onRefetch }) {
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Mostrando registros del {first} al {last}, Total {totalRecords} registros"
           globalFilter={globalFilter}
+          rowClassName={rowClass}
         >
           <Column
             field="item"
@@ -277,12 +300,11 @@ export default function ComInventoryTable({ comInventorys, onRefetch }) {
             sortable
             style={{ minWidth: "16rem" }}
           ></Column>
-          <Column field="model" header="Categoria"></Column>
-          <Column field="series" header="Proveedor"></Column>
-          <Column field="stock" header="Fecha de Registro"></Column>
-          <Column field="note" header="Stock"></Column>
-          <Column field="d_date" header="Precio Unitario"></Column>
-          <Column field="supplier" header="Precio total"></Column>
+          <Column field="model" header="Modelo"></Column>
+          <Column field="series" header="Serie"></Column>
+          <Column field="supplier" header="Proveedor"></Column>
+          <Column field="d_date" header="Fecha de Registro"></Column>
+          <Column field="stock" header="Stock"></Column>
           <Column field="accounting_code" header="Código Contable"></Column>
           <Column field="unitprice" header="Precio Unitario"></Column>
           <Column field="totalprice" header="Precio Total"></Column>
@@ -321,7 +343,7 @@ export default function ComInventoryTable({ comInventorys, onRefetch }) {
             <small className="p-error">El nombre es requerido.</small>
           )}
         </div>
-
+        
         <div className="field">
           <label htmlFor="model" className="font-bold">
             Modelo
@@ -357,36 +379,19 @@ export default function ComInventoryTable({ comInventorys, onRefetch }) {
         </div>
 
         <div className="field">
-          <label htmlFor="stock" className="font-bold">
-            Stock
+          <label htmlFor="supplier" className="font-bold">
+            Proveedor
           </label>
           <InputText
-            id="stock"
-            value={item.stock}
-            onChange={(e) => onInputChange(e, "stock")}
+            id="supplier"
+            value={item.supplier}
+            onChange={(e) => onInputChange(e, "supplier")}
             required
             autoFocus
-            className={classNames({ "p-invalid": submitted && !item.stock})}
+            className={classNames({ "p-invalid": submitted && !item.supplier})}
           />
-          {submitted && !item.stock && (
-            <small className="p-error">El stock es requerido.</small>
-          )}
-        </div>
-
-        <div className="field">
-          <label htmlFor="note" className="font-bold">
-            Nota
-          </label>
-          <InputText
-            id="note"
-            value={item.note}
-            onChange={(e) => onInputChange(e, "note")}
-            required
-            autoFocus
-            className={classNames({ "p-invalid": submitted && !item.note})}
-          />
-          {submitted && !item.note && (
-            <small className="p-error">Escriba una nota.</small>
+          {submitted && !item.supplier && (
+            <small className="p-error">El proveedor es requerido.</small>
           )}
         </div>
 
@@ -407,27 +412,26 @@ export default function ComInventoryTable({ comInventorys, onRefetch }) {
           )}
         </div>
 
-        
         <div className="field">
-          <label htmlFor="supplier" className="font-bold">
-            Proveedor
+          <label htmlFor="stock" className="font-bold">
+            Stock
           </label>
           <InputText
-            id="supplier"
-            value={item.supplier}
-            onChange={(e) => onInputChange(e, "supplier")}
+            id="stock"
+            value={item.stock}
+            onChange={(e) => onInputChange(e, "stock")}
             required
             autoFocus
-            className={classNames({ "p-invalid": submitted && !item.supplier})}
+            className={classNames({ "p-invalid": submitted && !item.stock})}
           />
-          {submitted && !item.supplier && (
-            <small className="p-error">El proveedor es requerido.</small>
+          {submitted && !item.stock && (
+            <small className="p-error">El stock es requerido.</small>
           )}
         </div>
 
         <div className="field">
           <label htmlFor="accounting_code" className="font-bold">
-            Proveedor
+            Codigo Contable
           </label>
           <InputText
             id="accounting_code"
@@ -438,7 +442,58 @@ export default function ComInventoryTable({ comInventorys, onRefetch }) {
             className={classNames({ "p-invalid": submitted && !item.accounting_code})}
           />
           {submitted && !item.accounting_code && (
-            <small className="p-error">El proveedor es requerido.</small>
+            <small className="p-error">Escriba un codigo contable.</small>
+          )}
+        </div>
+
+        <div className="field">
+          <label htmlFor="unitprice" className="font-bold">
+            Precio unitario
+          </label>
+          <InputText
+            id="unitprice"
+            value={item.unitprice}
+            onChange={(e) => onInputChange(e, "unitprice")}
+            required
+            autoFocus
+            className={classNames({ "p-invalid": submitted && !item.unitprice})}
+          />
+          {submitted && !item.unitprice && (
+            <small className="p-error">Escriba el precio unitario.</small>
+          )}
+        </div>
+
+        <div className="field">
+          <label htmlFor="totalprice" className="font-bold">
+            Precio unitario
+          </label>
+          <InputText
+            id="totalprice"
+            value={item.totalprice}
+            onChange={(e) => onInputChange(e, "totalprice")}
+            required
+            autoFocus
+            className={classNames({ "p-invalid": submitted && !item.totalprice})}
+          />
+          {submitted && !item.totalprice && (
+            <small className="p-error">Escriba el precio unitario.</small>
+          )}
+        </div>
+
+        <div className="field">
+          <label htmlFor="note" className="font-bold">
+            Nota
+          </label>
+          <InputText
+            id="note"
+            value={item.note}
+            onChange={(e) => onInputChange(e, "note")}
+            required
+            autoFocus
+            className={classNames({ "p-invalid": submitted && !item.note})}
+          />
+          {submitted && !item.note && (
+            <small className="p-error">Escriba una nota.</small>
           )}
         </div>
 

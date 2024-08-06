@@ -5,26 +5,26 @@ import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
-export default function InputOptionInventoryCount(props) {
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [productsConta, setProductsConta] = useState([]);
+export default function InputOptionInventoryCom(props) {
+    const [selectedProductCom, setSelectedProductCom] = useState(null);
+    const [productsCom, setProductsCom] = useState([]);
 
-    const getProductConta = async () => {
+    const getProductCom = async () => {
         try {
-            const response = await apiSystem.get(`/countInventory`);
-            const productContaData = response.data?.countInventorys;
-            const productContaNames = productContaData.map((r) => ({
-                key: r.pk_countinventory,
-                label: r.product,
+            const response = await apiSystem.get(`/comInventory`);
+            const productComData = response.data?.comInventorys;
+            const productComNames = productComData.map((r) => ({
+                key: r.pk_cominventory,
+                label: r.item,
             }));
-            setProductsConta(productContaNames);
+            setProductsCom(productComNames);
         } catch (error) {
             console.error("Error fetching inventory count products:", error);
         }
     };
 
     useEffect(() => {
-        getProductConta();
+        getProductCom();
     }, []);
 
     const selectedProductTemplate = (option, props) => {
@@ -47,16 +47,16 @@ export default function InputOptionInventoryCount(props) {
     };
 
     const handleChange = (e) => {
-        setSelectedProduct(e.value);
+        setSelectedProductCom(e.value);
         props?.onSelect(e.value?.key);
     };
 
     return (
         <div className="card flex justify-content-center">
             <Dropdown 
-                value={selectedProduct} 
+                value={selectedProductCom} 
                 onChange={handleChange} 
-                options={productsConta} 
+                options={productsCom} 
                 optionLabel="label" 
                 placeholder="Seleccione un producto"
                 filter 

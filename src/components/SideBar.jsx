@@ -13,11 +13,10 @@ const SideBar = (props) => {
       label: "Dashboard",
       className: "text text-white",
       icon: "pi pi-th-large",
-      url: "/menu",
+      url: "/",
     },
     {
       label: "Contabilidad",
-      className: "text bg-indigo-900",
       icon: "pi pi-fw pi-file",
       items: [
         {
@@ -36,7 +35,6 @@ const SideBar = (props) => {
     },
     {
       label: "Informática",
-      className: "text bg-indigo-900",
       icon: "pi pi-fw pi-file",
       items: [
         {
@@ -55,7 +53,6 @@ const SideBar = (props) => {
     },
     {
       label: "Talento Humano",
-      className: "text bg-indigo-900",
       icon: "pi pi-fw pi-file",
       items: [
         {
@@ -74,7 +71,6 @@ const SideBar = (props) => {
     },
     {
       label: "Usuarios",
-      className: "text bg-indigo-900",
       icon: "pi pi-fw pi-file",
       items: [
         {

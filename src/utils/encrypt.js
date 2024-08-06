@@ -10,7 +10,7 @@ export const encryptId = (message = "") => {
 
 export const decryptId = (message = "") => {
     try {
-        var bytes = AES.decrypt(message.replace(/INVENTRACK/g, '/menu'), privateKey);
+        var bytes = AES.decrypt(message.replace(/INVENTRACK/g, '/'), privateKey);
         var original = parseInt(bytes.toString(enc.Utf8));
         if (isNaN(original)) {
             return undefined

@@ -11,31 +11,31 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Tooltip } from 'primereact/tooltip';
 import { apiSystem } from "@/api";
-import { InputDate, InputOptionArea, InputOptionCollaborator, InputOptionInventoryCount, InputOptionPost, InputUser } from '@/components';
+import { InputDate, InputOptionArea, InputOptionCollaborator, InputOptionInventoryCom, InputOptionInventoryCount, InputOptionPost, InputUser } from '@/components';
 
-export default function ReportTable({ countReports, onRefetch, }) {
-  let emptyCountReport = {
-    pk_countreport: null,
+export default function ReportTable({ comReports, onRefetch, }) {
+  let emptyComReport = {
+    pk_comreport: null,
     amount_unit: "",
     d_delivery: "",
-    pk_countinventory: "",
+    pk_cominventory: "",
     pk_user: "",
     pk_collaborator: "",
     pk_area: "",
     pk_post: ""
   };
 
-  const [countReportDialog, setCountReportDialog] = useState(false);
-  const [deleteCountReportDialog, setDeleteCountReportDialog] = useState(false);
-  const [amount_unit, setAmount_unit] = useState(emptyCountReport);
-  const [selectedReportCounts, setSelectedReportCount] = useState(null);
+  const [comReportDialog, setComReportDialog] = useState(false);
+  const [deleteComReportDialog, setDeleteComReportDialog] = useState(false);
+  const [amount_unit, setAmount_unit] = useState(emptyComReport);
+  const [selectedReportComs, setSelectedReportComs] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
   const toast = useRef(null);
   const dt = useRef(null);
 
 
-  const exportColumns = countReports.map((col) => ({ title: col.header, dataKey: col.field }));
+  const exportColumns = comReports.map((col) => ({ title: col.header, dataKey: col.field }));
 
   const exportPdf = () => {
     import('jspdf').then((jsPDF) => {
@@ -46,7 +46,7 @@ export default function ReportTable({ countReports, onRefetch, }) {
         const exportColumns = [
           { title: 'Cantidad', dataKey: 'amount_unit' },
           { title: 'Fecha de entrega', dataKey: 'd_delivery' },
-          { title: 'Producto', dataKey: 'countInventory' },
+          { title: 'Item', dataKey: 'comInventory' },
           { title: 'Usuario', dataKey: 'user' },
           { title: 'Colaborador', dataKey: 'collaborator' },
           { title: 'Area', dataKey: 'area' },
@@ -54,10 +54,10 @@ export default function ReportTable({ countReports, onRefetch, }) {
         ];
   
         // Mapear los datos del reporte
-        const data = countReports.map((report) => ({
+        const data = comReports.map((report) => ({
           amount_unit: report.amount_unit,
           d_delivery: report.d_delivery,
-          countInventory: report.countInventory,
+          comInventory: report.comInventory,
           user: report.user,
           collaborator: report.collaborator,
           area: report.area,
@@ -78,7 +78,7 @@ export default function ReportTable({ countReports, onRefetch, }) {
   
   const exportExcel = () => {
     import('xlsx').then((xlsx) => {
-      const worksheet = xlsx.utils.json_to_sheet(countReports);
+      const worksheet = xlsx.utils.json_to_sheet(comReports);
       const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
       const excelBuffer = xlsx.write(workbook, {
         bookType: 'xlsx',
@@ -103,9 +103,9 @@ export default function ReportTable({ countReports, onRefetch, }) {
     });
   };
 
-  const createCountReport = async (data) => {
+  const createComReport = async (data) => {
     await apiSystem
-      .post(`/countReport`, data)
+      .post(`/comReport`, data)
       .then((response) => {
         console.log(response);
       })
@@ -114,9 +114,9 @@ export default function ReportTable({ countReports, onRefetch, }) {
       });
   };
 
-  const updateCountReport = async (id, data) => {
+  const updateComReport = async (id, data) => {
     await apiSystem
-      .put(`/countReport/${id}`, data)
+      .put(`/comReport/${id}`, data)
       .then((response) => {
         console.log(response);
       })
@@ -126,9 +126,9 @@ export default function ReportTable({ countReports, onRefetch, }) {
   };
 
  
-  const deleteCountReport = async (id) => {
+  const deleteComReport = async (id) => {
     await apiSystem
-      .delete(`/countReport/${id}`)
+      .delete(`/comReport/${id}`)
       .then((response) => {
         console.log(response);
       })
@@ -138,21 +138,21 @@ export default function ReportTable({ countReports, onRefetch, }) {
   };
 
   const openNew = () => {
-    setAmount_unit(emptyCountReport);
+    setAmount_unit(emptyComReport);
     setSubmitted(false);
-    setCountReportDialog(true);
+    setComReportDialog(true);
   };
 
   const hideDialog = () => {
     setSubmitted(false);
-    setCountReportDialog(false);
+    setComReportDialog(false);
   };
 
-  const hideDeleteCountDialog = () => {
-    setDeleteCountReportDialog(false);
+  const hideDeleteComDialog = () => {
+    setDeleteComReportDialog(false);
   };
 
-  const saveCountReport = async () => {
+  const saveComReport = async () => {
     setSubmitted(true);
 
     if (amount_unit.amount_unit.trim()) {
@@ -160,11 +160,11 @@ export default function ReportTable({ countReports, onRefetch, }) {
 
         try {
             // Check if there is enough stock before creating/updating the report
-            await updateInventory(amount_unit.pk_countinventory, amount_unit.amount_unit);
+            await updateInventoryCom(amount_unit.pk_cominventory, amount_unit.amount_unit);
 
-            if (amount_unit.pk_countreport) {
+            if (amount_unit.pk_comreport) {
                 // Update the report if it exists
-                await updateCountReport(amount_unit.pk_countreport, amount_unit);
+                await updateComReport(amount_unit.pk_comreport, amount_unit);
                 toast.current.show({
                     severity: "success",
                     summary: "Hoja de entrega actualizada",
@@ -173,7 +173,7 @@ export default function ReportTable({ countReports, onRefetch, }) {
                 });
             } else {
                 // Create the report if it doesn't exist
-                await createCountReport(amount_unit);
+                await createComReport(amount_unit);
                 toast.current.show({
                     severity: "success",
                     summary: "Éxito!",
@@ -182,8 +182,8 @@ export default function ReportTable({ countReports, onRefetch, }) {
                 });
             }
 
-            setCountReportDialog(false);
-            setAmount_unit(emptyCountReport);
+            setComReportDialog(false);
+            setAmount_unit(emptyComReport);
 
         } catch (error) {
             // Handle errors such as insufficient stock or other issues
@@ -196,75 +196,75 @@ export default function ReportTable({ countReports, onRefetch, }) {
             });
         }
     }
-    
+
     onRefetch();
 };
 
-  
-  
-const updateInventory = async (id, amountToSubtract) => {
-  try {
-      console.log(`Updating inventory with ID: ${id}`);
-      console.log(`Amount to subtract: ${amountToSubtract}`);
+const updateInventoryCom = async (id, amountToSubtract) => {
+    try {
+        console.log(`Updating inventory with ID: ${id}`);
+        console.log(`Amount to subtract: ${amountToSubtract}`);
 
-      // Obtener todos los inventarios
-      const response = await apiSystem.get(`/countInventory`);
-      console.log('Inventory data:', response.data);
+        // Obtener todos los inventarios
+        const response = await apiSystem.get(`/comInventory`);
+        console.log('Inventory data:', response.data);
 
-      // Buscar el inventario específico por ID
-      const inventory = response.data.countInventorys.find(inv => inv.pk_countinventory === id);
+        // Buscar el inventario específico por ID
+        const inventory = response.data.comInventorys.find(inv => inv.pk_cominventory === id);
 
-      if (!inventory || typeof inventory.amount === 'undefined') {
-          throw new Error(`Inventory with ID ${id} not found or has invalid data`);
-      }
+        if (!inventory || typeof inventory.stock === 'undefined') {
+            throw new Error(`Inventory with ID ${id} not found or has invalid data`);
+        }
 
-      const currentAmount = parseInt(inventory.amount, 10);
-      const subtractAmount = parseInt(amountToSubtract, 10);
-      const unitPrice = parseFloat(inventory.unitprice);
+        const currentAmount = parseInt(inventory.stock, 10);
+        const subtractAmount = parseInt(amountToSubtract, 10);
+        const unitPrice = parseFloat(inventory.unitprice);
 
-      if (isNaN(currentAmount) || isNaN(subtractAmount) || isNaN(unitPrice)) {
-          throw new Error('Invalid stock values');
-      }
+        if (isNaN(currentAmount) || isNaN(subtractAmount) || isNaN(unitPrice)) {
+            throw new Error('Invalid stock values');
+        }
 
-      // Check if there's enough stock to create the report
-      if (subtractAmount > currentAmount) {
-          console.error("Error: Insufficient stock to create the report.");
-          throw new Error("Insufficient stock to create the report.");
-      }
+        // Check if there's enough stock to create the report
+        if (subtractAmount > currentAmount) {
+            console.error("Error: Al crear la hoja de entrega.");
+            throw new Error("Stock Insuficiente.");
+        }
 
-      const newAmount = Math.max(currentAmount - subtractAmount, 0); // Evita cantidades negativas
-      console.log(`Current stock: ${currentAmount}, New stock: ${newAmount}`);
-      const newTotalPrice = (newAmount * unitPrice).toFixed(2);
+        const newAmount = Math.max(currentAmount - subtractAmount, 0); // Evita cantidades negativas
+        console.log(`Current stock: ${currentAmount}, New stock: ${newAmount}`);
+        const newTotalPrice = (newAmount * unitPrice).toFixed(2);
 
-      // Actualizar el inventario con la nueva cantidad
-      const updateResponse = await apiSystem.put(`/countInventory/${id}`, {
-          amount: newAmount,
-          totalprice: newTotalPrice
-      });
+        // Actualizar el inventario con la nueva cantidad
+        const updateResponse = await apiSystem.put(`/comInventory/${id}`, {
+            stock: newAmount,
+            totalprice: newTotalPrice
+        });
 
-      console.log('Update response:', updateResponse.data);
-      return updateResponse.data;
-  } catch (error) {
-      console.error("Error updating inventory:", error.response?.data || error.message);
-      throw error;
-  }
+        console.log('Update response:', updateResponse.data);
+        return updateResponse.data;
+    } catch (error) {
+        console.error("Error updating inventory:", error.response?.data || error.message);
+        throw error;
+    }
 };
 
-  const editCountReport = (amount_unit) => {
+  
+  
+  const editComReport = (amount_unit) => {
     setAmount_unit({ ...amount_unit });
-    setCountReportDialog(true);
+    setComReportDialog(true);
   };
 
-  const confirmDeleteCountReport = (amount_unit) => {
+  const confirmDeleteComReport = (amount_unit) => {
     setAmount_unit(amount_unit);
-    setDeleteCountReportDialog(true);
+    setDeleteComReportDialog(true);
   };
 
-  const deleteCountsReport = async () => {
+  const deleteComsReport = async () => {
     try {
-      await deleteCountReport(amount_unit.pk_countreport);
-      setDeleteCountReportDialog(false);
-      setAmount_unit(emptyCountReport);
+      await deleteComReport(amount_unit.pk_comreport);
+      setDeleteComReportDialog(false);
+      setAmount_unit(emptyComReport);
       toast.current.show({
         severity: "success",
         summary: "Éxito!",
@@ -316,14 +316,14 @@ const updateInventory = async (id, amountToSubtract) => {
           rounded
           outlined
           className="mr-2"
-          onClick={() => editCountReport(rowData)}
+          onClick={() => editComReport(rowData)}
         />
         <Button
           icon="pi pi-trash"
           rounded
           outlined
           severity="danger"
-          onClick={() => confirmDeleteCountReport(rowData)}
+          onClick={() => confirmDeleteComReport(rowData)}
         />
       </React.Fragment>
     );
@@ -347,7 +347,7 @@ const updateInventory = async (id, amountToSubtract) => {
     </div>
   );
 
-  const countDialogFooter = (
+  const comDialogFooter = (
     <React.Fragment>
       <Button
         label="Cancelar"
@@ -355,23 +355,23 @@ const updateInventory = async (id, amountToSubtract) => {
         outlined
         onClick={hideDialog}
       />
-      <Button label="Guardar" icon="pi pi-check" onClick={saveCountReport} />
+      <Button label="Guardar" icon="pi pi-check" onClick={saveComReport} />
     </React.Fragment>
   );
 
-  const deleteCountReportDialogFooter = (
+  const deleteComReportDialogFooter = (
     <React.Fragment>
       <Button
         label="No"
         icon="pi pi-times"
         outlined
-        onClick={hideDeleteCountDialog}
+        onClick={hideDeleteComDialog}
       />
       <Button
         label="Sí"
         icon="pi pi-check"
         severity="danger"
-        onClick={deleteCountsReport}
+        onClick={deleteComsReport}
       />
     </React.Fragment>
   );
@@ -383,22 +383,22 @@ const updateInventory = async (id, amountToSubtract) => {
       <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
       <DataTable
         ref={dt}
-        value={countReports}
-        selection={selectedReportCounts}
-        onSelectionChange={(e) => setSelectedReportCount(e.value)}
-        dataKey="pk_countreport"
+        value={comReports}
+        selection={selectedReportComs}
+        onSelectionChange={(e) => setSelectedReportComs(e.value)}
+        dataKey="pk_comreport"
         paginator
         rows={10}
         rowsPerPageOptions={[5, 10, 25]}
         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-        currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} countReports"
+        currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} comReports"
         globalFilter={globalFilter}
         header={header}
       >
         <Column selectionMode="multiple" exportable={false}></Column>
         <Column field="amount_unit" header="Cantidad" sortable></Column>
         <Column field="d_delivery" header="Fecha de entrega" sortable></Column>
-        <Column field="countInventory" header="Producto" sortable></Column>
+        <Column field="comInventory" header="Producto" sortable></Column>
         <Column field="user" header="Usuario" sortable></Column>
         <Column field="collaborator" header="Colaborador" sortable></Column>
         <Column field="area" header="Area" sortable></Column>
@@ -407,12 +407,12 @@ const updateInventory = async (id, amountToSubtract) => {
       </DataTable>
 
       <Dialog
-        visible={countReportDialog}
+        visible={comReportDialog}
         style={{ width: "450px" }}
         header="Hoja de entrega"
         modal
         className="p-fluid"
-        footer={countDialogFooter}
+        footer={comDialogFooter}
         onHide={hideDialog}
       >
         <div className="field">
@@ -451,15 +451,15 @@ const updateInventory = async (id, amountToSubtract) => {
           )}
         </div>
         <div className="field p-2">
-          <label htmlFor="pk_countinventory" className="font-bold">
+          <label htmlFor="pk_cominventory" className="font-bold">
             Producto
           </label>
-          <InputOptionInventoryCount
-            product={amount_unit.pk_countinventory}
-            onSelect={(optionId) => (amount_unit.pk_countinventory = optionId)}
+          <InputOptionInventoryCom
+            item={amount_unit.pk_cominventory}
+            onSelect={(optionId) => (amount_unit.pk_cominventory = optionId)}
             required
           />
-          {submitted && !amount_unit.pk_countinventory && (
+          {submitted && !amount_unit.pk_cominventory && (
             <small className="p-error">El producto es obligatorio.</small>
           )}
         </div>
@@ -518,12 +518,12 @@ const updateInventory = async (id, amountToSubtract) => {
       </Dialog>
 
       <Dialog
-        visible={deleteCountReportDialog}
+        visible={deleteComReportDialog}
         style={{ width: "450px" }}
         header="Confirmar"
         modal
-        footer={deleteCountReportDialogFooter}
-        onHide={hideDeleteCountDialog}
+        footer={deleteComReportDialogFooter}
+        onHide={hideDeleteComDialog}
       >
         <div className="confirmation-content">
           <i
