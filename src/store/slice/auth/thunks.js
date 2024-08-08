@@ -19,6 +19,7 @@ export const startLogin = (data1) => {
     } catch (error) {
       dispatch(loaded());
       errorModal(error.response.data.msg);
+      console.log(error.response.data.msg);
     }
   };
 };

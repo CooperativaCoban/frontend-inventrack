@@ -58,15 +58,26 @@ export const countReportPage = () => {
               postInfo = matchingPost.post;
             }
           }
+          // Format the date
+          const formatDateString = (dateString) => {
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+          };
 
+          // Assuming 'date' is the field name in your data
+          const formattedDate = a.d_date ? formatDateString(a.d_date) : null;
 
           return {
             ...a,
             countInventory: productInfo,
             user: userInfo,
-            collaborator:collaboratorInfo,
-            area:areaInfo,
-            post:postInfo
+            collaborator: collaboratorInfo,
+            area: areaInfo,
+            post: postInfo,
+            formattedDate: formattedDate
           };
         });
         setDataCount(dataCount);
@@ -147,7 +158,7 @@ export const countReportPage = () => {
     getCollaborators();
     getAreas();
     getPost();
-     
+
   }, [refetch]);
 
   return (

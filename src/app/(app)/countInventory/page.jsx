@@ -10,13 +10,25 @@ export const countInventoryPage = () => {
   const [data, setData] = useState([]);
   const [refetch, setRefetch] = useState(false);
 
+  const formatDateString = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   
   const getProduct = async () => {
     await apiSystem
       .get(`/countInventory`)
       .then((response) => {
-        setData(response?.data?.countInventorys);
-        console.log(response);
+        const data = response?.data?.countInventorys.map(product => ({
+          ...product,
+          d_date: formatDateString(product.d_date)
+        }));
+        setData(data);
+        console.log(data);
       })
       .catch((error) => {
         console.log(error);

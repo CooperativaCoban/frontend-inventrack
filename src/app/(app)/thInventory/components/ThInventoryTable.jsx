@@ -10,14 +10,16 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { apiSystem } from "@/api";
 import { useRef, useState } from "react";
+import { InputDate } from '@/components';
 
 export default function ThInventoryTable({ thInventorys, onRefetch }) {
-  let emptyThInventory = {
+  let emptythInventory = {
     pk_thinventory: null,
     product: "",
     size: "",
-    stock: "",
     gender: "",
+    stock: "",
+    supplier:"",
     d_date:"",
     supplier:"",
     unitprice:"",
@@ -27,8 +29,8 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
   };
 
   const [thDialog, setthDialog] = useState(false);
-  const [deleteThDialog, setDeleteThDialog] = useState(false);
-  const [product, setProduct] = useState(emptyThInventory);
+  const [deletethDialog, setDeletethDialog] = useState(false);
+  const [product, setProduct] = useState(emptythInventory);
   const [selectedProducts, setSelectedProduct] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
@@ -46,9 +48,12 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
       });
   };
 
-  const updateThInventory = async (id, data) => {
+  const updateTh = async (id, data) => {
     await apiSystem
-      .put(`/thInventory/${id}`, data)
+      .put(`/thInventory/${id}`, {
+        ...data,
+        totalprice: (parseFloat(data.stock) * parseFloat(data.unitprice)).toFixed(2)
+        })
       .then((response) => {
         console.log(response);
       })
@@ -57,7 +62,7 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
       });
   };
 
-  const deteleThInventory = async (id) => {
+  const deteleTh = async (id) => {
     await apiSystem
       .delete(`/thInventory/${id}`)
       .then((response) => {
@@ -68,8 +73,14 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
       });
   };
 
+  const rowClass = (data) => {
+    return {
+        'row-red': data.stock <= 5
+    }
+};
+
   const openNew = () => {
-    setProduct(emptyThInventory);
+    setProduct(emptythInventory);
     setSubmitted(false);
     setthDialog(true);
   };
@@ -80,18 +91,18 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
   };
 
   const hideDeleteThDialog = () => {
-    setDeleteThDialog(false);
+    setDeletethDialog(false);
   };
 
 
-  const saveThInventory = async () => {
+  const saveTh = async () => {
     setSubmitted(true);
 
     if (product.product.trim()) {
       console.log("que paso", product);
       if (product.pk_thinventory) {
         try {
-          await updateThInventory(product.pk_thinventory, product);
+          await updateTh(product.pk_thinventory, product);
           toast.current.show({
             severity: "success",
             summary: "Producto actualizado",
@@ -125,30 +136,35 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
             life: 3000,
           });
         }
+
+        setthDialog(false);
+        setProduct(emptythInventory);
+        onRefetch();
+
       }
 
       setthDialog(false);
-      setProduct(emptyThInventory);
+      setProduct(emptythInventory);
     }
     onRefetch(true);
   };
 
 
-  const editThInventory = (product) => {
+  const editCom = (product) => {
     setProduct({ ...product });
     setthDialog(true);
   };
 
-  const confirmDeleteTh = (product) => {
+  const confirmDeleteCom = (product) => {
     setProduct(product);
-    setDeleteThDialog(true);
+    setDeletethDialog(true);
   };
 
   const deleteThs = async () => {
     try {
-      await deteleThInventory(product.pk_thinventory);
-      setDeleteThDialog(false);
-      setProduct(emptyThInventory);
+      await deteleTh(product.pk_thinventory);
+      setDeletethDialog(false);
+      setProduct(emptythInventory);
       toast.current.show({
         severity: "success",
         summary: "Éxito!",
@@ -174,6 +190,14 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
 
     _th[`${nombre}`] = val;
 
+      // Calcula el precio total si el campo modificado es 'stock' o 'unitprice'
+      if (nombre === 'stock' || nombre === 'unitprice') {
+        const stock= parseFloat(_th.stock) || 0;
+        const unitprice = parseFloat(_th.unitprice) || 0;
+        _th.totalprice = (stock * unitprice).toFixed(2);
+      }
+
+
     setProduct(_th);
   };
 
@@ -196,14 +220,14 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
           rounded
           outlined
           className="mr-2"
-          onClick={() => editThInventory(rowData)}
+          onClick={() => editCom(rowData)}
         />
         <Button
           icon="pi pi-trash"
           rounded
           outlined
           severity="danger"
-          onClick={() => confirmDeleteTh(rowData)}
+          onClick={() => confirmDeleteCom(rowData)}
         />
       </React.Fragment>
     );
@@ -221,13 +245,13 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
       </span>
     </div>
   );
-  const comDialogFooter = (
+  const thDialogFooter  = (
     <React.Fragment>
       <Button label="Cancelar" icon="pi pi-times" outlined onClick={hideDialog} />
-      <Button label="Guardar" icon="pi pi-check" onClick={saveThInventory} />
+      <Button label="Guardar" icon="pi pi-check" onClick={saveTh} />
     </React.Fragment>
   );
-  const deleteComDialogFooter = (
+  const deleteThDialogFooter = (
     <React.Fragment>
       <Button
         label="No"
@@ -268,6 +292,7 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Mostrando registros del {first} al {last}, Total {totalRecords} registros"
           globalFilter={globalFilter}
+          rowClassName={rowClass}
         >
           <Column
             field="product"
@@ -275,11 +300,11 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
             sortable
             style={{ minWidth: "16rem" }}
           ></Column>
-          <Column field="size" header="Categoria"></Column>
-          <Column field="gender" header="Proveedor"></Column>
-          <Column field="stock" header="Fecha de Registro"></Column>
-          <Column field="d_date" header="Precio Unitario"></Column>
-          <Column field="supplier" header="Precio total"></Column>
+          <Column field="size" header="Tamaño"></Column>
+          <Column field="gender" header="Genero"></Column>
+          <Column field="supplier" header="Proveedor"></Column>
+          <Column field="d_date" header="Fecha de Registro"></Column>
+          <Column field="stock" header="Stock"></Column>
           <Column field="unitprice" header="Precio Unitario"></Column>
           <Column field="totalprice" header="Precio Total"></Column>
           
@@ -298,7 +323,7 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
         header="Crear Producto"
         modal
         className="p-fluid"
-        footer={comDialogFooter}
+        footer={thDialogFooter }
         onHide={hideDialog}
       >
         <div className="field">
@@ -317,7 +342,7 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
             <small className="p-error">El nombre es requerido.</small>
           )}
         </div>
-
+        
         <div className="field">
           <label htmlFor="size" className="font-bold">
             Tamaño
@@ -331,7 +356,7 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
             className={classNames({ "p-invalid": submitted && !product.size })}
           />
           {submitted && !product.size && (
-            <small className="p-error">El modelo es requerido.</small>
+            <small className="p-error">El tamaño es requerido.</small>
           )}
         </div>
 
@@ -348,7 +373,41 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
             className={classNames({ "p-invalid": submitted && !product.gender})}
           />
           {submitted && !product.gender && (
-            <small className="p-error">La serie es requerida.</small>
+            <small className="p-error">El genero es requerida.</small>
+          )}
+        </div>
+
+        <div className="field">
+          <label htmlFor="supplier" className="font-bold">
+            Proveedor
+          </label>
+          <InputText
+            id="supplier"
+            value={product.supplier}
+            onChange={(e) => onInputChange(e, "supplier")}
+            required
+            autoFocus
+            className={classNames({ "p-invalid": submitted && !product.supplier})}
+          />
+          {submitted && !product.supplier && (
+            <small className="p-error">El proveedor es requerido.</small>
+          )}
+        </div>
+
+        <div className="field">
+          <label htmlFor="d_date" className="font-bold">
+            Fecha de ingreso
+          </label>
+          <InputDate
+            id="d_date"
+            value={product.d_date}
+            onChange={(e) => onInputChange(e, "d_date")}
+            required
+            autoFocus
+            className={classNames({ "p-invalid": submitted && !product.d_date})}
+          />
+          {submitted && !product.d_date && (
+            <small className="p-error">La fecha es requerida.</small>
           )}
         </div>
 
@@ -370,23 +429,39 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
         </div>
 
         <div className="field">
-          <label htmlFor="d_date" className="font-bold">
-            Fecha de registro
+          <label htmlFor="unitprice" className="font-bold">
+            Precio unitario
           </label>
           <InputText
-            id="d_date"
-            value={product.d_date}
-            onChange={(e) => onInputChange(e, "d_date")}
+            id="unitprice"
+            value={product.unitprice}
+            onChange={(e) => onInputChange(e, "unitprice")}
             required
             autoFocus
-            className={classNames({ "p-invalid": submitted && !product.d_date})}
+            className={classNames({ "p-invalid": submitted && !product.unitprice})}
           />
-          {submitted && !product.d_date && (
-            <small className="p-error">La fecha es requerida.</small>
+          {submitted && !product.unitprice && (
+            <small className="p-error">Escriba el precio unitario.</small>
           )}
         </div>
 
-        
+        <div className="field">
+          <label htmlFor="totalprice" className="font-bold">
+            Precio Total
+          </label>
+          <InputText
+            id="totalprice"
+            value={product.totalprice}
+            onChange={(e) => onInputChange(e, "totalprice")}
+            required
+            autoFocus
+            className={classNames({ "p-invalid": submitted && !product.totalprice})}
+          />
+          {submitted && !product.totalprice && (
+            <small className="p-error">Escriba el precio unitario.</small>
+          )}
+        </div>
+
         <div className="field">
           <label htmlFor="supplier" className="font-bold">
             Proveedor
@@ -404,51 +479,15 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
           )}
         </div>
 
-
-        <div className="field">
-          <label htmlFor="unitprice" className="font-bold">
-            Precio Unitario
-          </label>
-          <InputText
-            id="unitprice"
-            value={product.unitprice}
-            onChange={(e) => onInputChange(e, "unitprice")}
-            required
-            autoFocus
-            className={classNames({ "p-invalid": submitted && !product.unitprice})}
-          />
-          {submitted && !product.unitprice && (
-            <small className="p-error">El precio unitario es requerido.</small>
-          )}
-        </div>
-
-        
-        <div className="field">
-          <label htmlFor="totalprice" className="font-bold">
-            Precio total
-          </label>
-          <InputText
-            id="totalprice"
-            value={product.totalprice}
-            onChange={(e) => onInputChange(e, "totalprice")}
-            required
-            autoFocus
-            className={classNames({ "p-invalid": submitted && !product.totalprice})}
-          />
-          {submitted && !product.totalprice && (
-            <small className="p-error">El precio total es requerido.</small>
-          )}
-        </div>
-
       </Dialog>
 
       <Dialog
-        visible={deleteThDialog}
+        visible={deletethDialog}
         style={{ width: "32rem" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
         header="Confirm"
         modal
-        footer={deleteComDialogFooter}
+        footer={deleteThDialogFooter}
         onHide={hideDeleteThDialog}
       >
         <div className="confirmation-content">
@@ -468,4 +507,3 @@ export default function ThInventoryTable({ thInventorys, onRefetch }) {
 }
 
 export { ThInventoryTable };
-
