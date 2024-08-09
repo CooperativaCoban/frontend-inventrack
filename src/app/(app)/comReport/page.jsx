@@ -153,7 +153,7 @@ export const comReportPage = () => {
 
   return (
     <div className="w-full">
-      <ComReportTable comReports={dataCom} onRefetch={setRefetchCom} />
+    <ComReportTable comReports={dataCom} onRefetch={() => setRefetchCom(true)} />
     </div>
   );
 };

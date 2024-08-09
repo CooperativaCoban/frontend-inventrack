@@ -20,7 +20,7 @@ const InputDate = (props) => {
   
 
     return (
-        <div className="card flex flex-wrap gap-3 p-fluid">
+        <div className="">
             <div className="flex-auto">
                 <Calendar {...props} />
             </div>

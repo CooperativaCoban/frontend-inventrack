@@ -31,6 +31,8 @@ export default function ReportTable({ comReports, onRefetch, }) {
   const [selectedReportComs, setSelectedReportComs] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const toast = useRef(null);
   const dt = useRef(null);
 
@@ -41,7 +43,7 @@ export default function ReportTable({ comReports, onRefetch, }) {
     import('jspdf').then((jsPDF) => {
       import('jspdf-autotable').then(() => {
         const doc = new jsPDF.default(0, 0);
-  
+
         // Crear el encabezado a partir de los nombres de columnas
         const exportColumns = [
           { title: 'Cantidad', dataKey: 'amount_unit' },
@@ -52,7 +54,7 @@ export default function ReportTable({ comReports, onRefetch, }) {
           { title: 'Area', dataKey: 'area' },
           { title: 'Puesto', dataKey: 'post' }
         ];
-  
+
         // Mapear los datos del reporte
         const data = comReports.map((report) => ({
           amount_unit: report.amount_unit,
@@ -63,19 +65,19 @@ export default function ReportTable({ comReports, onRefetch, }) {
           area: report.area,
           post: report.post,
         }));
-  
+
         // Crear la tabla en el PDF
         doc.autoTable({
           head: [exportColumns.map(col => col.title)],
           body: data.map(row => exportColumns.map(col => row[col.dataKey])),
         });
-  
+
         // Guardar el PDF con el nombre deseado
         doc.save('reports.pdf');
       });
     });
   };
-  
+
   const exportExcel = () => {
     import('xlsx').then((xlsx) => {
       const worksheet = xlsx.utils.json_to_sheet(comReports);
@@ -125,7 +127,7 @@ export default function ReportTable({ comReports, onRefetch, }) {
       });
   };
 
- 
+
   const deleteComReport = async (id) => {
     await apiSystem
       .delete(`/comReport/${id}`)
@@ -156,100 +158,100 @@ export default function ReportTable({ comReports, onRefetch, }) {
     setSubmitted(true);
 
     if (amount_unit.amount_unit.trim()) {
-        console.log("que paso", amount_unit);
+      console.log("que paso", amount_unit);
 
-        try {
-            // Check if there is enough stock before creating/updating the report
-            await updateInventoryCom(amount_unit.pk_cominventory, amount_unit.amount_unit);
+      try {
+        // Check if there is enough stock before creating/updating the report
+        await updateInventoryCom(amount_unit.pk_cominventory, amount_unit.amount_unit);
 
-            if (amount_unit.pk_comreport) {
-                // Update the report if it exists
-                await updateComReport(amount_unit.pk_comreport, amount_unit);
-                toast.current.show({
-                    severity: "success",
-                    summary: "Hoja de entrega actualizada",
-                    detail: "La Hoja de entrega se actualizó correctamente",
-                    life: 3000,
-                });
-            } else {
-                // Create the report if it doesn't exist
-                await createComReport(amount_unit);
-                toast.current.show({
-                    severity: "success",
-                    summary: "Éxito!",
-                    detail: "La hoja de entrega se creó correctamente",
-                    life: 3000,
-                });
-            }
-
-            setComReportDialog(false);
-            setAmount_unit(emptyComReport);
-
-        } catch (error) {
-            // Handle errors such as insufficient stock or other issues
-            console.log(error);
-            toast.current.show({
-                severity: "error",
-                summary: "Error!",
-                detail: error.message || "Hubo un error al crear/actualizar la hoja de entrega",
-                life: 3000,
-            });
+        if (amount_unit.pk_comreport) {
+          // Update the report if it exists
+          await updateComReport(amount_unit.pk_comreport, amount_unit);
+          toast.current.show({
+            severity: "success",
+            summary: "Hoja de entrega actualizada",
+            detail: "La Hoja de entrega se actualizó correctamente",
+            life: 3000,
+          });
+        } else {
+          // Create the report if it doesn't exist
+          await createComReport(amount_unit);
+          toast.current.show({
+            severity: "success",
+            summary: "Éxito!",
+            detail: "La hoja de entrega se creó correctamente",
+            life: 3000,
+          });
         }
+
+        setComReportDialog(false);
+        setAmount_unit(emptyComReport);
+
+      } catch (error) {
+        // Handle errors such as insufficient stock or other issues
+        console.log(error);
+        toast.current.show({
+          severity: "error",
+          summary: "Error!",
+          detail: error.message || "Hubo un error al crear/actualizar la hoja de entrega",
+          life: 3000,
+        });
+      }
     }
 
     onRefetch();
-};
+  };
 
-const updateInventoryCom = async (id, amountToSubtract) => {
+  const updateInventoryCom = async (id, amountToSubtract) => {
     try {
-        console.log(`Updating inventory with ID: ${id}`);
-        console.log(`Amount to subtract: ${amountToSubtract}`);
+      console.log(`Updating inventory with ID: ${id}`);
+      console.log(`Amount to subtract: ${amountToSubtract}`);
 
-        // Obtener todos los inventarios
-        const response = await apiSystem.get(`/comInventory`);
-        console.log('Inventory data:', response.data);
+      // Obtener todos los inventarios
+      const response = await apiSystem.get(`/comInventory`);
+      console.log('Inventory data:', response.data);
 
-        // Buscar el inventario específico por ID
-        const inventory = response.data.comInventorys.find(inv => inv.pk_cominventory === id);
+      // Buscar el inventario específico por ID
+      const inventory = response.data.comInventorys.find(inv => inv.pk_cominventory === id);
 
-        if (!inventory || typeof inventory.stock === 'undefined') {
-            throw new Error(`Inventory with ID ${id} not found or has invalid data`);
-        }
+      if (!inventory || typeof inventory.stock === 'undefined') {
+        throw new Error(`Inventory with ID ${id} not found or has invalid data`);
+      }
 
-        const currentAmount = parseInt(inventory.stock, 10);
-        const subtractAmount = parseInt(amountToSubtract, 10);
-        const unitPrice = parseFloat(inventory.unitprice);
+      const currentAmount = parseInt(inventory.stock, 10);
+      const subtractAmount = parseInt(amountToSubtract, 10);
+      const unitPrice = parseFloat(inventory.unitprice);
 
-        if (isNaN(currentAmount) || isNaN(subtractAmount) || isNaN(unitPrice)) {
-            throw new Error('Invalid stock values');
-        }
+      if (isNaN(currentAmount) || isNaN(subtractAmount) || isNaN(unitPrice)) {
+        throw new Error('Invalid stock values');
+      }
 
-        // Check if there's enough stock to create the report
-        if (subtractAmount > currentAmount) {
-            console.error("Error: Al crear la hoja de entrega.");
-            throw new Error("Stock Insuficiente.");
-        }
+      // Check if there's enough stock to create the report
+      if (subtractAmount > currentAmount) {
+        console.error("Error: Al crear la hoja de entrega.");
+        throw new Error("Stock Insuficiente.");
+      }
 
-        const newAmount = Math.max(currentAmount - subtractAmount, 0); // Evita cantidades negativas
-        console.log(`Current stock: ${currentAmount}, New stock: ${newAmount}`);
-        const newTotalPrice = (newAmount * unitPrice).toFixed(2);
+      const newAmount = Math.max(currentAmount - subtractAmount, 0); // Evita cantidades negativas
+      console.log(`Current stock: ${currentAmount}, New stock: ${newAmount}`);
+      const newTotalPrice = (newAmount * unitPrice).toFixed(2);
 
-        // Actualizar el inventario con la nueva cantidad
-        const updateResponse = await apiSystem.put(`/comInventory/${id}`, {
-            stock: newAmount,
-            totalprice: newTotalPrice
-        });
+      // Actualizar el inventario con la nueva cantidad
+      const updateResponse = await apiSystem.put(`/comInventory/${id}`, {
+        stock: newAmount,
+        totalprice: newTotalPrice
+      });
 
-        console.log('Update response:', updateResponse.data);
-        return updateResponse.data;
+      console.log('Update response:', updateResponse.data);
+      return updateResponse.data;
     } catch (error) {
-        console.error("Error updating inventory:", error.response?.data || error.message);
-        throw error;
+      console.error("Error updating inventory:", error.response?.data || error.message);
+      throw error;
     }
-};
+  };
 
-  
-  
+
+
   const editComReport = (amount_unit) => {
     setAmount_unit({ ...amount_unit });
     setComReportDialog(true);
@@ -331,15 +333,36 @@ const updateInventoryCom = async (id, amountToSubtract) => {
 
 
   const header = (
-    <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-      <span className="p-input-icon-left p-2">
-
-        <InputText
-          type="search"
-          onInput={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Buscar"
-        />
-      </span>
+    <div className="flex flex-wrap gap-4 align-items-center justify-content-between">
+      <div className="flex align-items-center gap-4">
+        <div className="flex align-items-center gap-2">
+          <label htmlFor="search" className="font-bold">Buscar:</label>
+          <span className="p-input-icon-left">
+            <InputText
+              id="search"
+              type="search"
+              onInput={(e) => setGlobalFilter(e.target.value)}
+              placeholder="Buscar..."
+            />
+          </span>
+        </div>
+        <div className="flex align-items-center gap-2">
+          <label htmlFor="startDate" className="font-bold">Fecha de inicio:</label>
+          <InputDate
+            id="startDate"
+            value={startDate}
+            onChange={(e) => setStartDate(e.value)}
+          />
+        </div>
+        <div className="flex align-items-center gap-2">
+          <label htmlFor="endDate" className="font-bold">Fecha de fin:</label>
+          <InputDate
+            id="endDate"
+            value={endDate}
+            onChange={(e) => setEndDate(e.value)}
+          />
+        </div>
+      </div>
       <div className="export-buttons">
         <Button type="button" icon="pi pi-file-excel" severity="success" rounded onClick={exportExcel} data-pr-tooltip="XLS" />
         <Button type="button" icon="pi pi-file-pdf" severity="warning" rounded onClick={exportPdf} data-pr-tooltip="PDF" />
@@ -358,6 +381,22 @@ const updateInventoryCom = async (id, amountToSubtract) => {
       <Button label="Guardar" icon="pi pi-check" onClick={saveComReport} />
     </React.Fragment>
   );
+
+  const filterDataByDate = (data) => {
+    if (!startDate && !endDate) return data;
+
+    return data.filter(item => {
+      const itemDate = new Date(item.d_delivery);
+      if (startDate && endDate) {
+        return itemDate >= startDate && itemDate <= endDate;
+      } else if (startDate) {
+        return itemDate >= startDate;
+      } else if (endDate) {
+        return itemDate <= endDate;
+      }
+      return true;
+    });
+  };
 
   const deleteComReportDialogFooter = (
     <React.Fragment>
@@ -383,7 +422,7 @@ const updateInventoryCom = async (id, amountToSubtract) => {
       <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
       <DataTable
         ref={dt}
-        value={comReports}
+        value={filterDataByDate(comReports)}
         selection={selectedReportComs}
         onSelectionChange={(e) => setSelectedReportComs(e.value)}
         dataKey="pk_comreport"
