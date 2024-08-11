@@ -163,7 +163,7 @@ export const countReportPage = () => {
 
   return (
     <div className="w-full">
-      <ReportTable countReports={dataCount} onRefetch={setRefetchCount} />
+      <ReportTable countReports={dataCount} onRefetch={() => setRefetchCount(true)} />
     </div>
   );
 };

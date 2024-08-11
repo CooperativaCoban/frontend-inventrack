@@ -236,7 +236,6 @@ export default function ComInventoryTable({ comInventorys, onRefetch }) {
   const header = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between ">
       <span className="p-input-icon-left">
-        <i className="pi pi-search" />
         <InputText
           type="search"
           onInput={(e) => setGlobalFilter(e.target.value)}

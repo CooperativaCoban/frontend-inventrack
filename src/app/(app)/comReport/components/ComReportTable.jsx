@@ -43,7 +43,10 @@ export default function ReportTable({ comReports, onRefetch, }) {
     import('jspdf').then((jsPDF) => {
       import('jspdf-autotable').then(() => {
         const doc = new jsPDF.default(0, 0);
-
+  
+        // Filtrar los datos por rango de fechas
+        const filteredReports = filterDataByDate(comReports);
+  
         // Crear el encabezado a partir de los nombres de columnas
         const exportColumns = [
           { title: 'Cantidad', dataKey: 'amount_unit' },
@@ -54,9 +57,9 @@ export default function ReportTable({ comReports, onRefetch, }) {
           { title: 'Area', dataKey: 'area' },
           { title: 'Puesto', dataKey: 'post' }
         ];
-
+  
         // Mapear los datos del reporte
-        const data = comReports.map((report) => ({
+        const data = filteredReports.map((report) => ({
           amount_unit: report.amount_unit,
           d_delivery: report.d_delivery,
           comInventory: report.comInventory,
@@ -65,13 +68,13 @@ export default function ReportTable({ comReports, onRefetch, }) {
           area: report.area,
           post: report.post,
         }));
-
+  
         // Crear la tabla en el PDF
         doc.autoTable({
           head: [exportColumns.map(col => col.title)],
           body: data.map(row => exportColumns.map(col => row[col.dataKey])),
         });
-
+  
         // Guardar el PDF con el nombre deseado
         doc.save('reports.pdf');
       });

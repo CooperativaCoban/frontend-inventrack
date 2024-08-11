@@ -31,6 +31,8 @@ export default function ReportTable({ countReports, onRefetch, }) {
   const [selectedReportCounts, setSelectedReportCount] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const toast = useRef(null);
   const dt = useRef(null);
 
@@ -41,6 +43,11 @@ export default function ReportTable({ countReports, onRefetch, }) {
     import('jspdf').then((jsPDF) => {
       import('jspdf-autotable').then(() => {
         const doc = new jsPDF.default(0, 0);
+
+        
+        // Filtrar los datos por rango de fechas
+        const filteredReports = filterDataByDate(countReports);
+  
   
         // Crear el encabezado a partir de los nombres de columnas
         const exportColumns = [
@@ -54,7 +61,7 @@ export default function ReportTable({ countReports, onRefetch, }) {
         ];
   
         // Mapear los datos del reporte
-        const data = countReports.map((report) => ({
+        const data = filteredReports.map((report) => ({
           amount_unit: report.amount_unit,
           d_delivery: report.d_delivery,
           countInventory: report.countInventory,
@@ -331,15 +338,36 @@ const updateInventory = async (id, amountToSubtract) => {
 
 
   const header = (
-    <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-      <span className="p-input-icon-left p-2">
-
-        <InputText
-          type="search"
-          onInput={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Buscar"
+    <div className="flex flex-wrap gap-4 align-items-center justify-content-between">
+    <div className="flex align-items-center gap-4">
+      <div className="flex align-items-center gap-2">
+        <label htmlFor="search" className="font-bold">Buscar:</label>
+        <span className="p-input-icon-left">
+          <InputText
+            id="search"
+            type="search"
+            onInput={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Buscar..."
+          />
+        </span>
+      </div>
+      <div className="flex align-items-center gap-2">
+        <label htmlFor="startDate" className="font-bold">Fecha de inicio:</label>
+        <InputDate
+          id="startDate"
+          value={startDate}
+          onChange={(e) => setStartDate(e.value)}
         />
-      </span>
+      </div>
+      <div className="flex align-items-center gap-2">
+        <label htmlFor="endDate" className="font-bold">Fecha de fin:</label>
+        <InputDate
+          id="endDate"
+          value={endDate}
+          onChange={(e) => setEndDate(e.value)}
+        />
+      </div>
+    </div>
       <div className="export-buttons">
         <Button type="button" icon="pi pi-file-excel" severity="success" rounded onClick={exportExcel} data-pr-tooltip="XLS" />
         <Button type="button" icon="pi pi-file-pdf" severity="warning" rounded onClick={exportPdf} data-pr-tooltip="PDF" />
@@ -358,6 +386,23 @@ const updateInventory = async (id, amountToSubtract) => {
       <Button label="Guardar" icon="pi pi-check" onClick={saveCountReport} />
     </React.Fragment>
   );
+
+  const filterDataByDate = (data) => {
+    if (!startDate && !endDate) return data;
+
+    return data.filter(product => {
+      const productDate = new Date(product.d_delivery);
+      if (startDate && endDate) {
+        return productDate >= startDate && productDate <= endDate;
+      } else if (startDate) {
+        return productDate >= startDate;
+      } else if (endDate) {
+        return productDate <= endDate;
+      }
+      return true;
+    });
+  };
+
 
   const deleteCountReportDialogFooter = (
     <React.Fragment>
@@ -383,7 +428,7 @@ const updateInventory = async (id, amountToSubtract) => {
       <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
       <DataTable
         ref={dt}
-        value={countReports}
+        value={filterDataByDate(countReports)}
         selection={selectedReportCounts}
         onSelectionChange={(e) => setSelectedReportCount(e.value)}
         dataKey="pk_countreport"

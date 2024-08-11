@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
-import { store } from "./store";
-import Cookies from "js-cookie";
 
-// This function can be marked `async` if using `await` inside
 export function middleware(request) {
-  let token  = request.cookies.get("token");
+  // Obtenemos el token de las cookies de la solicitud
+  let token = request.cookies.get("token");
+
+  // Si no hay token, redirigimos al usuario a la página de inicio de sesión
   if (!token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
+
+  // Si hay token, la función termina sin hacer nada, permitiendo que la solicitud continúe
 }
 
-// See "Matching Paths" below to learn more
+// Configuración para especificar en qué rutas se aplicará el middleware
 export const config = {
-  matcher: ["/menu","/countInventory", "/roles", "/countReport","/comInventory", "/thInventory", "/"],
+  // Array de rutas donde se aplicará el middleware
+  matcher: ["/menu", "/countInventory", "/roles", "/countReport", "/comInventory", "/thInventory", "/"],
 };
